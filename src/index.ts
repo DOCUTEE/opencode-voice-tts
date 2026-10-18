@@ -539,11 +539,41 @@ export default Plugin.define({
             await note(sessionID, `voice-tts: engine ${settings.engine}, giọng hiện tại "${currentVoice() || "(mặc định)"}". Có sẵn: ${list}`)
             return
           }
-          setCurrentVoice(name)
+
+          // Khớp mờ: người dùng có thể nói "nam miền trung" thay vì gõ đúng ID.
+          const normalize = (value: string) =>
+            value
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/đ/g, "d")
+          let chosen = name
+          let chosenLabel = name
+          if (daemonVoices.length > 0) {
+            const tokens = normalize(name)
+              .split(/[^a-z0-9:]+/)
+              .filter(Boolean)
+            let bestScore = 0
+            for (const [label, id] of daemonVoices) {
+              const haystack = normalize(`${label} ${id}`)
+              const score = tokens.reduce((total, token) => total + (haystack.includes(token) ? 1 : 0), 0)
+              if (score > bestScore) {
+                bestScore = score
+                chosen = id
+                chosenLabel = label
+              }
+            }
+            const needed = tokens.length > 1 ? Math.ceil(tokens.length / 2) : 1
+            if (bestScore < needed) {
+              chosen = name
+              chosenLabel = name
+            }
+          }
+          setCurrentVoice(chosen)
           await save()
-          if (daemon?.stdin?.writable) daemon.stdin.write(JSON.stringify({ cmd: "set_voice", voice: name }) + "\n")
-          await note(sessionID, `voice-tts: đã đổi giọng sang "${name}".`)
-          speak(`Đã đổi giọng đọc sang ${name}.`, { force: true })
+          if (daemon?.stdin?.writable) daemon.stdin.write(JSON.stringify({ cmd: "set_voice", voice: chosen }) + "\n")
+          await note(sessionID, `voice-tts: đã đổi giọng sang "${chosenLabel}" (${chosen}).`)
+          speak(`Đã đổi giọng đọc sang ${chosenLabel}.`, { force: true })
         },
       })
 

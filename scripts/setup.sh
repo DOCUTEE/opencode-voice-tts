@@ -11,12 +11,14 @@ RUNTIME="${VOICE_TTS_HOME:-$HOME/.local/share/opencode-voice-tts}"
 WITH_8BIT=0
 WARM=0
 INSTALL_HANDY=1
+RESTART_SERVICE=1
 
 for arg in "$@"; do
   case "$arg" in
     --with-8bit) WITH_8BIT=1 ;;
     --warm) WARM=1 ;;
     --no-handy) INSTALL_HANDY=0 ;;
+    --no-restart) RESTART_SERVICE=0 ;;
     *) echo "Cờ không hỗ trợ: $arg" >&2; exit 1 ;;
   esac
 done
@@ -111,8 +113,10 @@ if [[ "$INSTALL_HANDY" == "1" ]]; then
   fi
 fi
 
-say "Khởi động lại OpenCode"
-opencode service restart >/dev/null 2>&1 || warn "Chạy tay: opencode service restart"
+if [[ "$RESTART_SERVICE" == "1" ]]; then
+  say "Khởi động lại OpenCode"
+  opencode service restart >/dev/null 2>&1 || warn "Chạy tay: opencode service restart"
+fi
 
 cat <<'EOF'
 
