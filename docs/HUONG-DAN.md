@@ -252,24 +252,19 @@ uv pip install --python .venv/bin/python vieneu sounddevice
 
 ## 8. Cài trên máy mới (kiểu plugin chuẩn)
 
-Plugin đã được đóng gói chuẩn và đăng ở repo riêng tư:
+Plugin đã được đóng gói chuẩn và **công khai** tại:
 **github.com/DOCUTEE/opencode-voice-tts**
 
-Trên máy mới:
+Trên máy mới chỉ cần:
 
 ```bash
-# 1. Đăng nhập GitHub (repo đang để private)
-gh auth login
-gh auth setup-git
-
-# 2. Cài plugin bằng cơ chế chuẩn của OpenCode
 opencode plugin add github:DOCUTEE/opencode-voice-tts
 ```
 
-3. Mở OpenCode và gõ `/tts-setup` — plugin tự cài runtime Python, Handy cấu hình tiếng Việt.
-   Tuỳ chọn: `/tts-setup --with-8bit` (thêm model nhẹ), `/tts-setup --warm` (tải trước + phát thử).
+Rồi mở OpenCode gõ `/tts-setup` — plugin tự cài runtime Python và cấu hình Handy tiếng Việt.
+Tuỳ chọn: `/tts-setup --with-8bit` (thêm model nhẹ), `/tts-setup --warm` (tải trước + phát thử).
 
-4. Cấp quyền **Microphone + Accessibility** cho Handy là xong.
+Cuối cùng cấp quyền **Microphone + Accessibility** cho Handy là xong.
 
 Runtime (venv, model, log) nằm ở `~/.local/share/opencode-voice-tts`, tách khỏi plugin —
 cập nhật plugin không mất dữ liệu. Cập nhật phiên bản mới: `opencode plugin update`.

@@ -9,8 +9,9 @@ kèm phần cài đặt **nhập bằng giọng nói** (Handy + Whisper).
 
 ## Cài đặt
 
+Repo công khai — cài bằng một lệnh, không cần đăng nhập GitHub:
+
 ```bash
-# Cách 1: cài trực tiếp từ GitHub (khuyến nghị)
 opencode plugin add github:DOCUTEE/opencode-voice-tts
 
 # Cách 2: khai báo trong ~/.config/opencode/opencode.jsonc
