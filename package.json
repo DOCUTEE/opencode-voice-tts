@@ -1,0 +1,35 @@
+{
+  "name": "opencode-voice-tts",
+  "version": "0.1.0",
+  "description": "Vietnamese voice for OpenCode: summaries read aloud (VieNeu-TTS / OmniVoice) plus speech-to-text setup for Handy",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "python",
+    "scripts",
+    "docs",
+    "README.md"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tts",
+    "vietnamese",
+    "voice",
+    "speech"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DOCUTEE/opencode-voice-tts.git"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@opencode/plugin": "latest"
+  }
+}

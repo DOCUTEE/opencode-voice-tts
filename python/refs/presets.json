@@ -1,0 +1,38 @@
+{
+  "nu-bac": {
+    "label": "Nữ · Bắc",
+    "vieneu_voice": "Ngọc Huyền",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nu-bac.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  },
+  "nam-bac": {
+    "label": "Nam · Bắc",
+    "vieneu_voice": "Hải Đăng",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nam-bac.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  },
+  "nu-trung": {
+    "label": "Nữ · Trung",
+    "vieneu_voice": "Ngọc Trân",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nu-trung.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  },
+  "nam-trung": {
+    "label": "Nam · Trung",
+    "vieneu_voice": "Quang Sơn",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nam-trung.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  },
+  "nu-nam": {
+    "label": "Nữ · Nam",
+    "vieneu_voice": "Thùy Dung",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nu-nam.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  },
+  "nam-nam": {
+    "label": "Nam · Nam",
+    "vieneu_voice": "Thái Sơn",
+    "path": "/Users/quangnguyen/.config/opencode/plugins/voice-tts/tts/refs/nam-nam.wav",
+    "ref_text": "Xin chào, tôi là trợ lý giọng nói của bạn. Tôi sẽ đọc tóm tắt kết quả công việc và những việc cần làm tiếp theo."
+  }
+}

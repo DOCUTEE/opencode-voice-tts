@@ -1,0 +1,9 @@
+node_modules/
+bun.lock
+bun.lockb
+package-lock.json
+__pycache__/
+*.pyc
+*.log
+*.sock
+.DS_Store
