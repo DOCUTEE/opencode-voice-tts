@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "description": "Vietnamese voice for OpenCode: summaries read aloud (VieNeu-TTS / OmniVoice) plus speech-to-text setup for Handy",
   "type": "module",
+  "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
   "files": [
+    "index.ts",
     "src",
     "python",
     "scripts",
