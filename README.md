@@ -38,6 +38,7 @@ System Settings → Privacy & Security.
 | `/tts` | Bật/tắt đọc tự động |
 | `/tts-stop` | Dừng câu đang đọc |
 | `/tts-summary on\|off` | Tắt/bật tóm tắt trước khi đọc |
+| `/tts-prefix [câu\|off]` | Đổi/tắt câu mở đầu trước phần tóm tắt |
 | `/tts-engine omnivoice\|vieneu\|say` | Chọn engine |
 | `/tts-voice [tên]` | Chọn giọng (không tên = xem danh sách) |
 | `/tts-rate <80-400>` | Tốc độ cho engine `say` |
@@ -54,6 +55,7 @@ thiết kế sẵn: `design:nu-tre`, `design:nam-tram`, `design:nu-am`, `design:
 
 ```
 src/index.ts              plugin OpenCode (server runtime)
+src/speech.ts             ghép câu mở đầu + đọc câu hỏi của form
 python/daemon.py          daemon TTS dùng chung, singleton qua Unix socket
 python/engine_vieneu.py   engine VieNeu (ONNX)
 python/engine_omnivoice.py engine OmniVoice (MLX) + clone giọng mẫu

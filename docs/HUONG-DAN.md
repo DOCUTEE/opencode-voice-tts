@@ -85,7 +85,8 @@ Khi phiên chạy xong, plugin sẽ:
    (chỉ kết quả chính, bỏ code/đường dẫn/bảng).
 3. Đọc to bằng **VieNeu-TTS** (48 kHz, offline). Câu ngắn dưới 300 ký tự thì đọc nguyên văn.
 
-Plugin cũng tự đọc khi OpenCode **xin quyền** hoặc **đặt câu hỏi cần bạn trả lời**.
+Plugin cũng tự đọc khi OpenCode **xin quyền** hoặc **đặt câu hỏi cần bạn trả lời**
+(chỉ đọc câu hỏi đầu tiên, kèm các lựa chọn của câu đó).
 
 ### Các lệnh điều khiển (gõ trong khung chat)
 
@@ -93,12 +94,16 @@ Plugin cũng tự đọc khi OpenCode **xin quyền** hoặc **đặt câu hỏi
 | --- | --- |
 | `/tts` | Bật/tắt đọc tự động |
 | `/tts on` · `/tts off` | Bật hoặc tắt tường minh |
-| `/tts status` | Xem trạng thái (engine, giọng, tóm tắt) |
+| `/tts status` | Xem trạng thái (engine, giọng, tóm tắt, câu mở đầu) |
 | `/tts-stop` | **Dừng câu đang đọc** ngay lập tức |
 | `/tts-summary on` · `off` | Bật/tắt tóm tắt trước khi đọc |
+| `/tts-prefix [câu]` · `off` | Đổi/tắt câu mở đầu trước phần tóm tắt |
 | `/tts-engine omnivoice` · `vieneu` · `say` | Đổi engine đọc (xem mục 4) |
 | `/tts-voice [tên]` | Đổi giọng; gõ trống để xem danh sách |
 | `/tts-rate 190` | Tốc độ đọc cho engine `say` (80–400) |
+
+Câu mở đầu mặc định là *"Dạ anh Quang, nãy giờ em làm như thế này:"*; đổi bằng
+`/tts-prefix <câu mới>`, tắt bằng `/tts-prefix off`.
 
 ### Danh sách giọng VieNeu (25 giọng)
 

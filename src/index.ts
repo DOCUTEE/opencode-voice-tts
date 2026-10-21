@@ -10,6 +10,7 @@
 //   /tts on|off|status       — điều khiển tường minh
 //   /tts-stop                — dừng câu đang đọc
 //   /tts-summary on|off      — bật/tắt tóm tắt trước khi đọc
+//   /tts-prefix [câu|off]    — đổi câu mở đầu trước phần tóm tắt
 //   /tts-engine <tên>        — chọn engine đọc
 //   /tts-voice [tên]         — chọn giọng (không tên = xem danh sách)
 //   /tts-rate <số>           — tốc độ cho engine "say" (80-400)
@@ -20,6 +21,7 @@ import { existsSync } from "node:fs"
 import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
 import { Plugin } from "@opencode/plugin"
+import { DEFAULT_PREFIX, firstFormQuestion, withPrefix } from "./speech"
 
 type Engine = "omnivoice" | "vieneu" | "say"
 
@@ -31,6 +33,7 @@ type Settings = {
   voice: string
   rate: number
   summarize: boolean
+  prefix: string
   maxChars: number
   announcePermissions: boolean
   announceErrors: boolean
@@ -44,6 +47,7 @@ const DEFAULT_SETTINGS: Settings = {
   voice: "Linh",
   rate: 190,
   summarize: true,
+  prefix: DEFAULT_PREFIX,
   maxChars: 280,
   announcePermissions: true,
   announceErrors: true,
@@ -103,6 +107,7 @@ function normalizeSettings(value: unknown): Settings {
     voice: pick("voice", DEFAULT_SETTINGS.voice),
     rate: pick("rate", DEFAULT_SETTINGS.rate),
     summarize: pick("summarize", DEFAULT_SETTINGS.summarize),
+    prefix: pick("prefix", DEFAULT_SETTINGS.prefix),
     // 700 là giá trị mặc định cũ (quá dài khiến TTS chậm); hạ về mặc định mới.
     maxChars: storedMaxChars === 700 ? DEFAULT_SETTINGS.maxChars : storedMaxChars,
     announcePermissions: pick("announcePermissions", DEFAULT_SETTINGS.announcePermissions),
@@ -418,7 +423,8 @@ export default Plugin.define({
           if (!(await isRootSession(sessionID))) continue
           const answer = await lastAssistantText(sessionID)
           if (!answer) continue
-          speak(await summarizeForSpeech(sessionID, answer))
+          const summary = await summarizeForSpeech(sessionID, answer)
+          if (summary) speak(withPrefix(settings.prefix, summary))
           continue
         }
 
@@ -442,8 +448,9 @@ export default Plugin.define({
           const form = isRecord(data?.["form"]) ? data["form"] : undefined
           const formSessionID = typeof form?.["sessionID"] === "string" ? form["sessionID"] : undefined
           if (!formSessionID || !(await isRootSession(formSessionID))) continue
-          const title = typeof form?.["title"] === "string" ? form["title"] : ""
-          speak(`OpenCode có câu hỏi cần bạn trả lời. ${title}`.trim())
+          const question = firstFormQuestion(form)
+          if (!question) continue
+          speak(`OpenCode có câu hỏi cần bạn trả lời. ${question}`)
         }
       }
     })().catch((error) => {
@@ -470,7 +477,7 @@ export default Plugin.define({
             ].join(", ")
             await note(
               sessionID,
-              `voice-tts: ${settings.enabled ? "đang bật" : "đang tắt"} · engine ${settings.engine} · giọng ${currentVoice() || "(mặc định)"} · tóm tắt ${settings.summarize ? "bật" : "tắt"} · runtime: ${runtimeStatus}`,
+              `voice-tts: ${settings.enabled ? "đang bật" : "đang tắt"} · engine ${settings.engine} · giọng ${currentVoice() || "(mặc định)"} · tóm tắt ${settings.summarize ? "bật" : "tắt"} · mở đầu ${settings.prefix ? `"${settings.prefix}"` : "tắt"} · runtime: ${runtimeStatus}`,
             )
             return
           } else {
@@ -504,6 +511,33 @@ export default Plugin.define({
           await save()
           await note(sessionID, `voice-tts: tóm tắt ${settings.summarize ? "đã bật" : "đã tắt"}.`)
           speak(`Tóm tắt ${settings.summarize ? "đã bật" : "đã tắt"}.`, { force: true })
+        },
+      })
+
+      editor.add({
+        name: "tts-prefix",
+        description: "Đổi câu mở đầu trước phần tóm tắt, hoặc off để tắt (voice-tts)",
+        execute: async ({ sessionID, prompt }) => {
+          const raw = (prompt.text ?? "").trim()
+          if (!raw) {
+            await note(
+              sessionID,
+              `voice-tts: câu mở đầu ${settings.prefix ? `"${settings.prefix}"` : "đang tắt"}.`,
+            )
+            return
+          }
+          const argument = raw.toLowerCase()
+          if (argument === "off" || argument === "tắt" || argument === "tat") {
+            settings.prefix = ""
+            await save()
+            await note(sessionID, "voice-tts: đã tắt câu mở đầu.")
+            speak("Đã tắt câu mở đầu.", { force: true })
+            return
+          }
+          settings.prefix = raw
+          await save()
+          await note(sessionID, `voice-tts: câu mở đầu "${raw}".`)
+          speak("Đã đặt câu mở đầu mới.", { force: true })
         },
       })
 
