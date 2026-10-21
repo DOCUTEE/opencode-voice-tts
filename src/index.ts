@@ -21,6 +21,7 @@ import { existsSync } from "node:fs"
 import { homedir } from "node:os"
 import { fileURLToPath } from "node:url"
 import { Plugin } from "@opencode/plugin"
+import { speechCommands } from "./daemon"
 import { DEFAULT_PREFIX, firstFormQuestion, withPrefix } from "./speech"
 
 type Engine = "omnivoice" | "vieneu" | "say"
@@ -164,6 +165,13 @@ export default Plugin.define({
       await ctx.storage.set(SETTINGS_KEY, settings as unknown as Record<string, never>)
     }
 
+    // Nhiều location có thể nạp cùng plugin; mỗi instance phải đọc lại storage
+    // trước khi đọc để không dùng setting cũ đè lên daemon dùng chung.
+    const refreshSettings = async () => {
+      settings = normalizeSettings(await ctx.storage.get(SETTINGS_KEY))
+      return settings
+    }
+
     const currentVoice = (): string => {
       if (settings.engine === "omnivoice") return settings.omnivoiceVoice
       if (settings.engine === "vieneu") return settings.vieneuVoice
@@ -215,19 +223,27 @@ export default Plugin.define({
         daemonVoices = voices
           .filter((item): item is [string, string] => Array.isArray(item) && item.length >= 2)
           .map((item) => [String(item[0]), String(item[1])])
-        if (!currentVoice() && daemonVoices.length > 0) {
-          setCurrentVoice(daemonVoices[0][1])
-          void save()
-        }
-        if (currentVoice() && daemon?.stdin?.writable) {
-          daemon.stdin.write(JSON.stringify({ cmd: "set_voice", voice: currentVoice() }) + "\n")
-        }
+        void (async () => {
+          await refreshSettings()
+          if (!currentVoice() && daemonVoices.length > 0) {
+            setCurrentVoice(daemonVoices[0][1])
+            await save()
+          }
+          const child = daemon
+          if (!child?.stdin?.writable) return
+          if (pendingSpeech) {
+            const text = pendingSpeech
+            pendingSpeech = null
+            for (const line of speechCommands(currentVoice(), String(Date.now()), text)) {
+              child.stdin.write(line + "\n")
+            }
+            return
+          }
+          if (currentVoice()) {
+            child.stdin.write(JSON.stringify({ cmd: "set_voice", voice: currentVoice() }) + "\n")
+          }
+        })().catch((error) => log("warn", `không đồng bộ giọng: ${String(error)}`))
         log("info", `${daemonEngine} ready — giọng: ${currentVoice() || "(mặc định)"}`)
-        if (pendingSpeech && daemon?.stdin?.writable) {
-          const text = pendingSpeech
-          pendingSpeech = null
-          daemon.stdin.write(JSON.stringify({ cmd: "speak", id: String(Date.now()), text }) + "\n")
-        }
         return
       }
       if (event["event"] === "voices") {
@@ -314,7 +330,9 @@ export default Plugin.define({
       const child = ensureDaemon()
       if (!child) return false
       if (daemonReady && child.stdin?.writable) {
-        child.stdin.write(JSON.stringify({ cmd: "speak", id: String(Date.now()), text }) + "\n")
+        for (const line of speechCommands(currentVoice(), String(Date.now()), text)) {
+          child.stdin.write(line + "\n")
+        }
         return true
       }
       // Daemon đang nạp model: giữ câu mới nhất, đọc ngay khi sẵn sàng.
@@ -419,6 +437,7 @@ export default Plugin.define({
         const sessionID = typeof data?.["sessionID"] === "string" ? data["sessionID"] : undefined
 
         if (event.type === "session.execution.succeeded" && sessionID) {
+          await refreshSettings()
           if (!settings.enabled) continue
           if (!(await isRootSession(sessionID))) continue
           const answer = await lastAssistantText(sessionID)
@@ -429,6 +448,7 @@ export default Plugin.define({
         }
 
         if (event.type === "session.execution.failed" && sessionID) {
+          await refreshSettings()
           if (!settings.enabled || !settings.announceErrors) continue
           if (!(await isRootSession(sessionID))) continue
           speak("Phiên làm việc gặp lỗi. Mời bạn xem chi tiết trên màn hình.")
@@ -436,6 +456,7 @@ export default Plugin.define({
         }
 
         if (event.type === "permission.asked" && sessionID) {
+          await refreshSettings()
           if (!settings.enabled || !settings.announcePermissions) continue
           if (!(await isRootSession(sessionID))) continue
           const action = typeof data?.["action"] === "string" ? data["action"] : "một thao tác"
@@ -444,6 +465,7 @@ export default Plugin.define({
         }
 
         if (event.type === "form.created") {
+          await refreshSettings()
           if (!settings.enabled || !settings.announcePermissions) continue
           const form = isRecord(data?.["form"]) ? data["form"] : undefined
           const formSessionID = typeof form?.["sessionID"] === "string" ? form["sessionID"] : undefined
